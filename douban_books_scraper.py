@@ -91,6 +91,7 @@ def do_crawling_by_tag(book_tag, page_size, is_basic_tag):
             print(e)
             continue
 
+        print(f"url: {url}")
         soup = BeautifulSoup(plain_text, features="lxml")
 
         if is_basic_tag:
@@ -138,12 +139,14 @@ def do_crawling_by_tag(book_tag, page_size, is_basic_tag):
                 #     raters_count = get_book_info(book_url).get('ratersCount').strip('人评价')
                 # except:
                 #     raters_count = '0'
-                book_comments = get_book_comments(book_url, False, 10)
+                # book_comments = get_book_comments(book_url, False, 10)
 
                 print("authorInfo:" + author_info + "; rating:" + str(book_info.get('averageRating')) + "(" + str(
                     book_info.get('ratersCount')) + ")" + "; pubInfo:" + pub_info + "; img:" + book_info.get('img')[0])
                 book_info_map = {'title': title, 'bookUrl': book_url, 'authorInfo': author_info, 'pubInfo': pub_info,
-                                 'bookInfo': book_info, 'comments': book_comments}
+                                 'bookInfo': book_info
+                                 #, 'comments': book_comments
+                                 }
                 book_info_map_list.append(book_info_map)
         else:
             for book_info in div_book_list.find_all('div', {'class': 'info'}):
@@ -172,12 +175,14 @@ def do_crawling_by_tag(book_tag, page_size, is_basic_tag):
                 #     raters_count = get_book_info(book_url).get('ratersCount').strip('人评价')
                 # except:
                 #     raters_count = '0'
-                book_comments = get_book_comments(book_url, False, 10)
+                #book_comments = get_book_comments(book_url, False, 10)
 
                 print("authorInfo:" + author_info + "; rating:" + str(book_info.get('averageRating')) + "(" + str(
                     book_info.get('ratersCount')) + ")" + "; pubInfo:" + pub_info + "; img:" + book_info.get('img')[0])
                 book_info_map = {'title': title, 'bookUrl': book_url, 'authorInfo': author_info, 'pubInfo': pub_info,
-                                 'bookInfo': book_info, 'comments': book_comments}
+                                 'bookInfo': book_info
+                                 # , 'comments': book_comments
+                                 }
                 book_info_map_list.append(book_info_map)
 
             retrying_times = 0  # Reset when valid information is received
@@ -235,7 +240,7 @@ def get_book_info(book_url):
     test_rating_string = rating_parent.find('a', href='collections')
     if test_rating_string is None:
         test_rating_string = rating_parent.find('div', {'class': 'rating_sum'}).find('span')
-    if average_rating == ' ' and (test_rating_string.string.find('评价') != -1 or test_rating_string is None):
+    if average_rating == ' '  and (test_rating_string is None or test_rating_string.string is None or test_rating_string.string.find('评价') != -1):
         average_rating = 0.0
         raters_count = 0
     else:
@@ -279,17 +284,19 @@ def get_book_comments(book_url, sort_by_time, list_size):
     :param list_size: 获取评论条数
     :return: 评论信息列表
     """
+    print(f"book_url: {book_url}")
     comment_info = {}
     comment_info_list = []
     list_count = 0
     # 最新评论
     if sort_by_time:
-        plain_text = parse_book_url(book_url + "/comments/new")
+        plain_text = parse_book_url(book_url + "/comments?sort=time")
     # 最热评论
     else:
-        plain_text = parse_book_url(book_url + "/comments/hot")
+        plain_text = parse_book_url(book_url + "/comments/?sort=newscore")
 
     soup = BeautifulSoup(plain_text, features="lxml")
+    print(f"{soup}")
     comments_count = soup.find('span', id='total-comments').string.strip()
     comment_info['commentsCount'] = comments_count
     if re.findall(r'\d+', comments_count) != '0':
@@ -363,7 +370,7 @@ def export_data_to_json(list, book_tag, file_path_prefix, is_basic_tag):
         json_path = file_path_prefix + "/" + book_tag + "_0" + SUFFIX_JSON
     else:
         json_path = file_path_prefix + "/" + book_tag + SUFFIX_JSON
-    with open(json_path, "w") as f:
+    with open(json_path, "w",encoding="utf-8") as f:
         f.write(json.dumps(list, ensure_ascii=False))
         # json.dump(list, f)
 
@@ -374,6 +381,6 @@ if __name__ == '__main__':
     # https://www.douban.com/tag//?source=topic_search
     # book_tag_lists = ['香港', '台湾', '北京', '上海', '日本', '韩国', '英国', '意大利', '清迈', '巴黎', '欧洲', '火车']
     # book_tag_lists = ['哲学', '建筑', '古建筑', '寺庙', '宗教', '人文', '历史', '博物馆']
-    book_tag_lists = ['拜占庭', '古巴比伦', '古埃及']
+    book_tag_lists = ['明朝']
     # 只测试爬取2页
-    crawl_by_tags(book_tag_lists, 2, False)
+    crawl_by_tags(book_tag_lists, 10, False)
