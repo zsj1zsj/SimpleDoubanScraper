@@ -7,10 +7,3 @@
 #### Feature
  - 爬取豆瓣读书默认标签下图书列表（如[https://www.douban.com/tag/%E7%BD%97%E9%A9%AC/](https://www.douban.com/tag/%E7%BD%97%E9%A9%AC/?source=topic_search)）及用户自定义标签下图书列表（如[https://book.douban.com/tag/%E5%8F%A4%E5%B7%B4%E6%AF%94%E4%BC%A6](https://book.douban.com/tag/%E5%8F%A4%E5%B7%B4%E6%AF%94%E4%BC%A6)）
  - 导出JSON格式数据，数据涵盖图书概要、评分、图书与作者简介以及用户评论等（可插拔）
- 
-#### Todo List
- > 接口部分
- - 借助Tornado等Python Web框架对服务进行封装，并最终以独立Web服务的形式接入Spring Cloud注册中心
- > Python服务代码部分
- - 集成UA池（如[hellysmile/fake-useragent](https://github.com/hellysmile/fake-useragent)）与代理池（如[jhao104/proxy_pool](https://github.com/jhao104/proxy_pool)），封装成独立服务
- - 重构为多线程爬取
